@@ -15,7 +15,7 @@ const logOut = asyncHandler(async (req,res)=>{
     }
     res.status(201).clearCookie("ACCESS_TOKEN",Option)
      .clearCookie("REFRESH_TOKEN",Option).json(
-     new ApiRes(201,"loged in successfully")
+     new ApiRes(201,"loged out successfully")
     )
 })
 

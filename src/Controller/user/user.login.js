@@ -8,7 +8,6 @@ import {USER} from "../../models/user.models.js"
    userObj.refreshToken=REFRESH_TOKEN;
   await userObj.save({ validateBeforeSave: false });
   
-
    return {
     ACCESS_TOKEN,REFRESH_TOKEN
    }
@@ -42,9 +41,6 @@ import {USER} from "../../models/user.models.js"
     }
  const {password:password1,refreshToken,...result}= user._doc
 
-console.log(user);
-
- 
    res.status(201).cookie("ACCESS_TOKEN",ACCESS_TOKEN,Option).
    cookie("REFRESH_TOKEN",REFRESH_TOKEN,Option).json(
     new ApiRes(201,"loged in successfully",result)
