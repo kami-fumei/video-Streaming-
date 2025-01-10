@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { upload } from "../middleware/multer.middleware.js";
-import {registerUser} from "../Controller/user.controller.js"
+import {logOut,login,registerUser} from "../Controller/user/user.funcs.exports.js"
+import {AuthVerify,upload} from "../middleware/middleware.funcs.exports.js"
+
 const Userrouter = Router();
 
 
@@ -14,4 +15,10 @@ Userrouter.route("/register").post(upload.fields([{
 }
 ]),registerUser)
 
-export {Userrouter}
+Userrouter.post("/login",login)
+
+Userrouter.post("/logout",AuthVerify,logOut);
+
+console.log("car",typeof Userrouter.post); 
+
+export default Userrouter

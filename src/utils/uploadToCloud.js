@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import fs, { link } from 'fs';
+import fs from 'fs';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDNAME,
@@ -10,16 +10,14 @@ cloudinary.config({
 const cloudUpload = async (localPath) => {
   try {
     if (!localPath) return null;
-    const cloudinary_response = await cloudinary.uploader.upload(localPath, {
+    
+ const cloudinary_response = await cloudinary.uploader.upload(localPath, {
       resource_type: 'auto',
     });
-    // console.log('file uploaded successfully :', cloudinary_response.url);
-
-    fs.unlinkSync(localPath);
-
     return cloudinary_response;
+
   } catch (error) {
-    fs.unlinkSync(localPath);
+    console.error('Error uploading file:', error);
     return null;  
   }
 };
