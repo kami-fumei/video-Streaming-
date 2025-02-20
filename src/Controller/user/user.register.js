@@ -6,7 +6,7 @@ import {
 } from '../../utils/untils.expoter.js';
 import { USER } from '../../models/user.models.js';
 import fs from 'fs';
-import { log } from 'console';
+
 
 const filesPath = (req) => {
   let { avatar, coverImg } = req.files;
@@ -24,14 +24,14 @@ const filesPath = (req) => {
   return { avatarPath, coverImgPath };
 }
 
-const removeFlie = (avatarPath,coverImgPath) => {
-  if (avatarPath) {
-    fs.unlinkSync(avatarPath);
-  }
-  if(coverImgPath) {
-   fs.unlinkSync(coverImgPath);
-  }
-}
+// const removeFlie = (avatarPath,coverImgPath) => {
+//   if (avatarPath) {
+//     fs.unlinkSync(avatarPath);
+//   }
+//   if(coverImgPath) {
+//    fs.unlinkSync(coverImgPath);
+//   }
+// }
 
 const registerUser = asyncHandler(async (req, res, next) => {
   try {
@@ -61,20 +61,20 @@ const registerUser = asyncHandler(async (req, res, next) => {
       throw new ApiErr(400, 'user already existes');
     }
 
-    const urlAavatar = (await cloudUpload(avatarPath)).url;
+    const Aavatar = (await cloudUpload(avatarPath));
 
-    let urlCoverImg;
-    if (coverImgPath) urlCoverImg =  (await cloudUpload(coverImgPath)).url;
+    let CoverImg;
+    if (coverImgPath) CoverImg =  (await cloudUpload(coverImgPath));
 
-    if (!urlAavatar||(coverImgPath&&!urlCoverImg)) return new ApiErr(500, 'avatar or coverImgP upload failed');
-  
+    if (!Aavatar?.url||(coverImgPath&&!CoverImg)) return new ApiErr(500, 'avatar or coverImg upload failed');
+   
     const newUser = await USER.create({
       userName,
       fullName,
       email,
       password,
-      avatar: urlAavatar,
-      coverImg: urlCoverImg || '',
+      avatar: Aavatar.url,
+      coverImg: CoverImg.url || '',
     });
 
     if (!newUser) return new ApiErr(500, 'new User not created');
@@ -85,7 +85,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
 
     if (!resUser) return new ApiErr(500, 'new User not created');
 
-    removeFlie( avatarPath, coverImgPath);
+    // removeFlie( avatarPath, coverImgPath);
     return res
       .status(201)
       .json(new ApiRes(201, 'Successfully created user', resUser));
@@ -93,8 +93,8 @@ const registerUser = asyncHandler(async (req, res, next) => {
    catch (error) {
     const { avatarPath, coverImgPath } = filesPath(req);
     console.log( error);
-    removeFlie( avatarPath, coverImgPath);
+    // removeFlie( avatarPath, coverImgPath);
    throw error;
   }
 });
-export { registerUser };
+export { registerUser};

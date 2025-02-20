@@ -18,5 +18,4 @@ app.use(express.static("public"))
 app.use("/api/v1/user",Userrouter);
 
 
-
 export {app}

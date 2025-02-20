@@ -6,7 +6,7 @@ import {USER} from "../../models/user.models.js"
    const REFRESH_TOKEN = await userObj.genrateREFRESH_TOKEN();
    
    userObj.refreshToken=REFRESH_TOKEN;
-  await userObj.save({ validateBeforeSave: false });
+  await userObj.save();
   
    return {
     ACCESS_TOKEN,REFRESH_TOKEN
@@ -47,4 +47,24 @@ import {USER} from "../../models/user.models.js"
    )
     
     } )
-    export{ login }
+
+    const logOut = asyncHandler(async (req,res)=>{
+      await USER.findByIdAndUpdate(req.user._id,{
+          $unset:{
+              refreshToken:1
+          }
+      },{
+          new:true
+      })
+      const Option ={
+          httpOnly:true,
+          secure:true,
+      }
+      res.status(201).clearCookie("ACCESS_TOKEN",Option)
+       .clearCookie("REFRESH_TOKEN",Option).json(
+       new ApiRes(201,"loged out successfully")
+      )
+  })
+  
+
+    export{ login,logOut }
