@@ -6,13 +6,72 @@ import {
   } from '../../utils/untils.expoter.js';
   import { USER } from '../../models/user.models.js';
   import {Video} from '../../models/video.models.js'
-  import fs from 'fs';
+ 
   
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    const { page = 1, limit = 10, query, sortBy, sortType, userName } = req.query
     //todo: get all videos based on query, sort, pagination
+    
+    const results = await Video.aggregate([
+        {
+          $search: {
+            index: "default",
+            compound: {
+              should: [ 
+                {
+                  text: {
+                    query,
+                    path: "titel",
+                    fuzzy: {
+                      maxEdits: 1, 
+                      prefixLength: 3 
+                    },
+                    score: { boost: { value: 5 } } 
+                  }
+                },
+                {
+                  text: {
+                    query, 
+                    path: "description",
+                    fuzzy: { maxEdits: 2 },
+                    score: { boost: { value: 2 } }
+                  }
+                }
+              ],
+              minimumShouldMatch: 1, 
+            }
+          }
+        },
+        { $match: { isPrivate: false } }, 
+        {
+          $addFields: {
+            relevanceScore: {
+              $add: [
+                { $multiply: [{ $meta: "searchScore" }, 0.7] },
+                { $multiply: ["$viwes", 0.3] } 
+              ]
+            }
+          }
+        },
+        { $sort: { relevanceScore: -1 } },
+        { $limit: 10 },
+        {
+          $project: {
+            score: 1,
+            relevanceScore: 1,
+            videofile: 1,
+            titel: 1,
+            description: 1,
+            viwes: 1,
+            thubmail: 1,
+            duration: 1,
+            owner: 1
+          }
+        }
+      ]);
+      
 
-
+    res.status(200).json(new ApiRes(200,"search results",results))
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -35,10 +94,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
    const newVideo =  await Video.create({
     videofile:video.url,
-    titel,
+    title,
     description,
-    thubmail,
-    duration,
+    thubmail:thubmail.url, 
+    duration:video.duration,
     isPrivate,
     owner:user._id
    })
@@ -54,9 +113,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
 })
 
 const getVideoById = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    // get video by id
-
+    const { videoId } = req.params;
+    
    const video = await Video.findById(videoId);
 
 if(!video){
@@ -122,7 +180,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         throw new ApiErr(500,"Something went wrong while updating")
     }
 
-    res.status(200).json(new ApiErr(200,"Video publishes switched to:",isPrivate));
+    res.status(200).json(new ApiErr(200,"Video publishes switched to:",video));
 })
 
 export {

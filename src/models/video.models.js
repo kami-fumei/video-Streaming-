@@ -5,8 +5,11 @@ const videoShema = new mongoose.Schema(
   {
     videofile: {
       type: String,
-      require: [true, 'video is required'],
+      require: [true, 'video is required'], 
     },
+    // videoId:{
+    //   type:Int32
+    // },
     titel: {
       type: String,
       require: [true, 'titel is required'],
